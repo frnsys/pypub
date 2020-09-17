@@ -204,9 +204,9 @@ class Epub(object):
         self.META_INF_DIR = os.path.join(self.EPUB_DIR, 'META-INF')
         self.LOCAL_IMAGE_DIR = 'images'
         self.IMAGE_DIR = os.path.join(self.OEBPS_DIR, self.LOCAL_IMAGE_DIR)
-        os.makedirs(self.OEBPS_DIR)
-        os.makedirs(self.META_INF_DIR)
-        os.makedirs(self.IMAGE_DIR)
+        for dir in [self.OEBPS_DIR, self.META_INF_DIR, self.IMAGE_DIR]:
+            if not os.path.exists(dir):
+                os.makedirs(dir)
 
     def _increase_current_chapter_number(self):
         if self.current_chapter_number is None:
