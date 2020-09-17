@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import urllib.request, urllib.parse, urllib.error
 import urllib.parse
-import uuid
+from hashlib import md5
 
 import bs4
 from bs4 import BeautifulSoup
@@ -68,16 +68,17 @@ def save_image(image_url, image_directory, image_name):
 
     try:
         # urllib.urlretrieve(image_url, full_image_file_name)
-        with open(full_image_file_name, 'wb') as f:
-            user_agent = r'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0'
-            request_headers = {'User-Agent': user_agent}
-            requests_object = requests.get(image_url, headers=request_headers)
-            try:
-                content = requests_object.content
-                # Check for empty response
-                f.write(content)
-            except AttributeError:
-                raise ImageErrorException(image_url)
+        if not os.path.exists(full_image_file_name):
+            with open(full_image_file_name, 'wb') as f:
+                user_agent = r'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0'
+                request_headers = {'User-Agent': user_agent}
+                requests_object = requests.get(image_url, headers=request_headers)
+                try:
+                    content = requests_object.content
+                    # Check for empty response
+                    f.write(content)
+                except AttributeError:
+                    raise ImageErrorException(image_url)
     except IOError:
         raise ImageErrorException(image_url)
     return image_type
@@ -101,7 +102,7 @@ def _replace_image(image_url, image_tag, ebook_folder,
     except AssertionError:
         raise TypeError("image_tag cannot be of type " + str(type(image_tag)))
     if image_name is None:
-        image_name = str(uuid.uuid4())
+        image_name = md5(image_url.encode('utf8')).hexdigest()
     try:
         image_full_path = os.path.join(ebook_folder, 'images')
         assert os.path.exists(image_full_path)
